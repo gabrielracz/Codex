@@ -18,16 +18,27 @@
 //	read numwords from file
 
 int GenerateSample(char* sample, int len);
+char* GenerateGoodbye(void);
 int FormattedPrint(WINDOW* win, char ch, int width);
 
-int main(int argc, char* argv[]){
+int main(int argc, char** argv){
 
+	FILE* scribe = fopen("./manuscript", "a");
 
-    int wrds;
+	time_t time;
+	srand((long) &time);
+	long wrds = 10;
+
+	//printf("%d", argc);
+	if(argc >=  2){
+		sscanf(argv[1], "%ld", &wrds);
+	}else{
     printf("Word count:  ");
-    scanf("%d", &wrds);
-
-	//wrds = 45;
+    scanf("%ld", &wrds);
+	if(wrds < 1)
+		wrds = rand() % 10 + 1;
+	}
+	if(wrds < 1) wrds = rand() % 10 + 1;
     
 	WINDOW* win = initscr();
     start_color();
@@ -50,7 +61,7 @@ int main(int argc, char* argv[]){
 	char* sample = malloc(sizeof(char) * wrds * MAX_WORD_LEN);
     GenerateSample(sample, wrds);
     int len = strlen(sample);
-	
+
 		
 	//Maximum lines
 	int ends[10];
@@ -72,6 +83,11 @@ int main(int argc, char* argv[]){
 
     struct timespec start, finish; 
     char* userinput = malloc(sizeof(char) * len);
+	
+	short perfectword = 1;
+	int charstreak = 0;
+	int combo = 1;
+	int topcombo = 1;
 
     short first = 1;
 	int ix = 0;
@@ -110,10 +126,20 @@ int main(int argc, char* argv[]){
             continue;
         }
 		else if(ch == sample[index]){	//Match
-            attron(COLOR_PAIR(1));
+			if(ch == ' '){
+				if(perfectword == 1){
+					combo++;
+					if(combo > topcombo)
+						topcombo = combo;
+				}
+			}
+			perfectword = 1;
+			attron(COLOR_PAIR(1));
             //mvaddch(index/w, index%w, ch);
         }
 		else{								//Error
+           	perfectword = 0;
+			combo = 0;
             attron(COLOR_PAIR(2));
 			if(sample[index] == ' ')
                 ch = '_';
@@ -129,6 +155,7 @@ int main(int argc, char* argv[]){
 
         wordcount++;
         index++;
+		charstreak++;
         refresh();
     }
 
@@ -139,6 +166,14 @@ int main(int argc, char* argv[]){
 
     printf("Delta:       %.2fs\n", delta);
     printf("WPM:         %d\n", (int) round(wrds/delta*60));
+	printf("Top:         %d\n", topcombo);
+	if(charstreak == len){	
+		printf("%s.\n", GenerateGoodbye());
+		fprintf(scribe, "%s\n", sample);
+		if(rand()%10 == 0)
+			fprintf(scribe, "\n");
+		fclose(scribe);
+	}
     return 0;
 }
 
@@ -176,4 +211,15 @@ int GenerateSample(char* sample, int len){
         if(j != len - 1)
             strcat(sample, " ");
     }
+}
+
+char* GenerateGoodbye(){
+	char* sayings[] = {
+	"The scribe will make note of it.", 
+	"It will be dealt with.",
+	"The records will be updated.",
+	};
+	int l = sizeof(sayings)/ sizeof(char*);
+	return sayings[rand() % l];
+
 }
