@@ -1,6 +1,6 @@
 //	Gabriel Racz
 //	11-24-2021
-//	v1.1
+//	v1.2
 //
 // char sample[] = "And as he rose from the black of night his cold smile pierced like light";
 #include<ncurses.h>
@@ -32,13 +32,10 @@ int main(int argc, char** argv){
 	//printf("%d", argc);
 	if(argc >=  2){
 		sscanf(argv[1], "%ld", &wrds);
-	}else{
-    printf("Word count:  ");
-    scanf("%ld", &wrds);
-	if(wrds < 1)
-		wrds = rand() % 10 + 1;
 	}
-	if(wrds < 1) wrds = rand() % 10 + 1;
+	if(wrds < 1 || argc < 2){ 
+		wrds = rand() % 10 + 2;
+	}
     
 	WINDOW* win = initscr();
     start_color();
@@ -195,7 +192,7 @@ int FormattedPrint(WINDOW* win, char ch, int width){
 int GenerateSample(char* sample, int len){
     char words[NUM_WORDS][MAX_WORD_LEN];
     
-    FILE* file = fopen("words.txt", "r");
+    FILE* file = fopen("dictionary", "r");
     for(int i = 0; i < NUM_WORDS; i++){
         // words[i] = malloc(sizeof(char) * MAX_WORD_LEN);
         fscanf(file, "%[^\n] ", words[i]);
