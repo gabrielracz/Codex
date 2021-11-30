@@ -185,7 +185,7 @@ int FormattedPrint(WINDOW* win, char ch, int width){
 	int cursory;
 	int savex;
 	getyx(win, cursory, cursorx);
-	//printw("%d ", ch);
+	//Adding a test comment
 	addch(ch);
 	if(ch == ' ' && cursorx > width - 4){
 		savex = cursorx;
@@ -200,9 +200,7 @@ int GenerateSample(char* sample, int len){
     
     FILE* file = fopen("dictionary", "r");
     for(int i = 0; i < NUM_WORDS; i++){
-        // words[i] = malloc(sizeof(char) * MAX_WORD_LEN);
         fscanf(file, "%[^\n] ", words[i]);
-        // printf("%s\n", words[i]);
     }
     time_t t;
     srand((unsigned) time(&t));
