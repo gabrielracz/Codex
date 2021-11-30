@@ -16,15 +16,23 @@
 
 //Scoring
 //	read numwords from file
+// Testing git changes	
 
 int GenerateSample(char* sample, int len);
 char* GenerateGoodbye(void);
 int FormattedPrint(WINDOW* win, char ch, int width);
 
+enum COLORS {
+	WHITE = 1,
+	GREEN,
+	RED,
+	BLUE
+};
+
 int main(int argc, char** argv){
 
 	FILE* scribe = fopen("./manuscript", "a");
-
+	
 	time_t time;
 	srand((long) &time);
 	long wrds = 10;
@@ -38,18 +46,15 @@ int main(int argc, char** argv){
 	}
     
 	WINDOW* win = initscr();
+    noecho();		//disables displaying garbage characters 
     start_color();
-    noecho();
-    init_pair(1, COLOR_GREEN, COLOR_BLACK);
-    init_pair(2, COLOR_RED, COLOR_BLACK);
-    init_pair(3, COLOR_BLUE, COLOR_BLACK);
-    init_pair(4, COLOR_WHITE, COLOR_BLACK);
-    init_pair(5, COLOR_WHITE, COLOR_BLACK);
+    init_pair(1, COLOR_WHITE, COLOR_BLACK);
+    init_pair(2, COLOR_GREEN, COLOR_BLACK);
+    init_pair(3, COLOR_RED, COLOR_BLACK);
+    init_pair(4, COLOR_BLUE, COLOR_BLACK);
     // wbkgd(win, COLOR_PAIR(5));
     
-	//resizeterm(60, 60);
 	clear();
-	//usleep(500000);
    	refresh(); 
 	int w, h;
     getmaxyx(win, h, w);
@@ -82,10 +87,11 @@ int main(int argc, char** argv){
     char* userinput = malloc(sizeof(char) * len);
 	
 	short perfectword = 1;
-	int charstreak = 0;
+	
 	int combo = 1;
 	int topcombo = 1;
 
+	short error = 0;
     short first = 1;
 	int ix = 0;
 	move(0, 0);
@@ -105,7 +111,7 @@ int main(int argc, char** argv){
                 wordcount--;
                 index--;
             }
-            attron(COLOR_PAIR(4));
+            attron(COLOR_PAIR(WHITE));
 			int srows;
 			int scols;
 			if(x == 0){
@@ -131,13 +137,14 @@ int main(int argc, char** argv){
 				}
 			}
 			perfectword = 1;
-			attron(COLOR_PAIR(1));
+			attron(COLOR_PAIR(GREEN));
             //mvaddch(index/w, index%w, ch);
         }
 		else{								//Error
+			error = 1;
            	perfectword = 0;
 			combo = 0;
-            attron(COLOR_PAIR(2));
+            attron(COLOR_PAIR(RED));
 			if(sample[index] == ' ')
                 ch = '_';
             else
@@ -152,7 +159,6 @@ int main(int argc, char** argv){
 
         wordcount++;
         index++;
-		charstreak++;
         refresh();
     }
 
@@ -164,10 +170,10 @@ int main(int argc, char** argv){
     printf("Delta:       %.2fs\n", delta);
     printf("WPM:         %d\n", (int) round(wrds/delta*60));
 	printf("Top:         %d\n", topcombo);
-	if(charstreak == len){	
-		printf("%s.\n", GenerateGoodbye());
+	if(!error){	
+		printf("%s\n", GenerateGoodbye());
 		fprintf(scribe, "%s\n", sample);
-		if(rand()%10 == 0)
+		if(rand()%6 == 0)
 			fprintf(scribe, "\n");
 		fclose(scribe);
 	}
@@ -181,7 +187,7 @@ int FormattedPrint(WINDOW* win, char ch, int width){
 	getyx(win, cursory, cursorx);
 	//printw("%d ", ch);
 	addch(ch);
-	if(ch == ' ' && cursorx > width - 11){
+	if(ch == ' ' && cursorx > width - 4){
 		savex = cursorx;
 		addch('\n');
 		return savex;
